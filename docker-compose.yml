@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16.4-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data   # named volume -> data tetap ada setelah down
+    networks: [backend]
+    healthcheck:                          # app baru start kalau DB benar-benar siap
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "${APP_PORT:-8000}:8000"          # buka di http://localhost:8000
+    environment:
+      # Host = "db" (nama service), BUKAN localhost / IP
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [backend]
+
+  adminer:                                # tool lihat isi DB, hanya jalan dengan --profile tools
+    image: adminer:4.8.1
+    profiles: [tools]
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [backend]
+
+networks:
+  backend:                                # user-defined network
+    driver: bridge
+
+volumes:
+  pgdata:
