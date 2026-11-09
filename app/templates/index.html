@@ -25,12 +25,15 @@
   .tag { font-size:.8rem; padding:1px 8px; border-radius:10px; background:var(--sea); color:#fff; margin-right:6px; }
   .empty { color:#667; font-style:italic; }
   .del { margin:0 0 0 8px; padding:0 8px; background:#fff; color:var(--ink); }
+  .tip { margin:4px 0; color:#556; font-size:.92rem; }
+  blockquote { margin:6px 0 14px; padding:8px 12px; border-left:5px solid var(--chum); background:#fff3ee; border-radius:0 8px 8px 0; }
+  ol { padding-left:22px; }
 </style>
 </head>
 <body>
 <header>
   <h1>TeachingIsFum</h1>
-  <p>Teaching is fum, because learning to teach should be fun. (Chum is fum!)</p>
+  <p>Teaching is fum, because learning to teach should be fun.</p>
 </header>
 <main>
   <section class="wide">
@@ -91,19 +94,26 @@ $("btnSave").onclick = async () => {
 };
 
 $("btnAnalyze").onclick = async () => {
+  const box = $("result"); box.textContent = "Menganalisis...";
   const res = await fetch("/analyze", { method:"POST", headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({ text:$("text").value, age_group:$("age").value }) });
-  const box = $("result"); box.innerHTML = "";
+  box.innerHTML = "";
   if (res.status !== 201) { box.textContent = "Teks minimal 20 karakter."; return; }
   const d = await res.json();
-  const h = document.createElement("h3"); h.textContent = "Poin penting yang perlu diajarkan"; box.append(h);
-  const ul1 = document.createElement("ul");
-  d.highlights.forEach(s => { const li = document.createElement("li"); const m = document.createElement("mark"); m.textContent = s; li.append(m); ul1.append(li); });
-  box.append(ul1);
-  const h2 = document.createElement("h3"); h2.textContent = "Contoh kalimat mengajar (" + d.age_group + ")"; box.append(h2);
-  const ul2 = document.createElement("ul");
-  d.phrases.forEach(s => { const li = document.createElement("li"); li.textContent = s; ul2.append(li); });
-  box.append(ul2);
+  const el = (tag, text, cls) => { const e = document.createElement(tag); e.textContent = text; if (cls) e.className = cls; return e; };
+  const list = (items, fn) => { const ul = document.createElement("ul"); items.forEach(i => ul.append(fn(i))); return ul; };
+  box.append(el("h3", "Yang terdeteksi dari materi"));
+  box.append(el("p", "Bahasa: " + (d.detected.bahasa.join(", ") || "-") + " | Konsep: " + (d.detected.konsep.join(", ") || "-") + " | Project: " + d.detected.project));
+  box.append(el("h3", "Perlu diperhatikan"));
+  box.append(list(d.warnings, w => el("li", w)));
+  if (d.highlights.length) {
+    box.append(el("h3", "Kalimat kunci di materi"));
+    box.append(list(d.highlights, s => { const li = document.createElement("li"); li.append(el("mark", s)); return li; }));
+  }
+  box.append(el("h3", "Urutan mengajar dan contoh kalimat (" + d.age_group + ")"));
+  const ol = document.createElement("ol");
+  d.steps.forEach(s => { const li = document.createElement("li"); li.append(el("strong", s.title)); li.append(el("p", "Saran: " + s.tip, "tip")); li.append(el("blockquote", s.script)); ol.append(li); });
+  box.append(ol);
 };
 loadNotes();
 </script>
