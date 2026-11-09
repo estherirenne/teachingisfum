@@ -1,13 +1,13 @@
 # TeachingIsFum
 
-Teaching is fum, because learning to teach should be fun. ("Chum is fum!")
-Web app untuk membantu persiapan mengajar coding anak SD-SMA: sorot poin penting materi, contoh kalimat mengajar per usia, dan catatan pribadi (kekurangan diri + perkembangan murid).
+Teaching is fum, because learning to teach should be fun. #terinspirasi dari film spongebob yang patrick nya bikin slogan di chumbucket (Chum is Fum!).
+Web app untuk membantu persiapan mengajar coding anak SD-SMA: highlight poin penting dari materi mengajar, contoh kalimat mengajar per usia, dan catatan pribadi (improve diri sendiri + perkembangan murid).
 
 **Stack:** FastAPI, PostgreSQL 16, Docker Compose.
 
 ## Cara menjalankan
 ```bash
-git clone <URL-REPO-KAMU>
+git clone (https://github.com/estherirenne/teachingisfum.git)
 cd teachingisfum
 cp .env.example .env
 docker compose up -d --build
