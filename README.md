@@ -41,6 +41,9 @@ Lalu buka http://localhost:8080 (System: PostgreSQL, Server: `db`, user/password
 Menghentikan aplikasi tanpa menghapus data: `docker compose down`.
 Menghentikan dan menghapus data: `docker compose down -v`.
 
+## Docker Hub
+Image tersedia di Docker Hub: https://hub.docker.com/r/estherirenne/teachingisfum (tag `1.0.0` dan `latest`)
+
 ## Screenshot
 ![Aplikasi dan docker compose](web.png)
 
