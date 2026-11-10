@@ -14,19 +14,31 @@ services:
       timeout: 3s
       retries: 10
 
+  redis:                                  # BONUS: service cache
+    image: redis:7.4.1-alpine
+    networks: [backend]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]  # sehat kalau dibalas PONG
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   app:
     build: .
     ports:
-      - "${APP_PORT:-8000}:8000"          # buka di http://localhost:8000
+      - "${APP_PORT:-8000}:8000"
     environment:
-      # Host = "db" (nama service), BUKAN localhost / IP
+      # Host = nama service (db, redis), BUKAN localhost / IP
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks: [backend]
 
-  adminer:                                # tool lihat isi DB, hanya jalan dengan --profile tools
+  adminer:                                # hanya jalan dengan --profile tools
     image: adminer:4.8.1
     profiles: [tools]
     ports:
@@ -37,7 +49,7 @@ services:
     networks: [backend]
 
 networks:
-  backend:                                # user-defined network
+  backend:
     driver: bridge
 
 volumes:
